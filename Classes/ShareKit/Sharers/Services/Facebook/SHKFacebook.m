@@ -288,7 +288,7 @@ static SHKFacebook *requestingPermisSHKFacebook=nil;
 {
 	[self saveItemForLater:SHKPendingShare];
 	
-	NSAssert(authingSHKFacebook == nil, @"ShareKit: auth loop logic error - will lead to leaks");
+	[authingSHKFacebook release];
 	authingSHKFacebook = self;
 	[self retain];
 	
