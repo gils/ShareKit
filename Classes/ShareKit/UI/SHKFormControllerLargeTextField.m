@@ -118,11 +118,13 @@
 	CGRect keyboardFrame;
 	CGFloat keyboardHeight;
 	
+    BOOL naturalCoordinateSpace = [UIScreen instancesRespondToSelector:@selector(coordinateSpace)]; // in ios8, the cooridnates are as the view expects them to be.
+    
 	// 3.2 and above
 	if (&UIKeyboardFrameEndUserInfoKey)
 	{		
 		[[notification.userInfo valueForKey:UIKeyboardFrameEndUserInfoKey] getValue:&keyboardFrame];		
-		if ([self interfaceOrientation] == UIDeviceOrientationPortrait || [self interfaceOrientation] == UIDeviceOrientationPortraitUpsideDown) 
+		if (naturalCoordinateSpace || [self interfaceOrientation] == UIDeviceOrientationPortrait || [self interfaceOrientation] == UIDeviceOrientationPortraitUpsideDown)
 			keyboardHeight = keyboardFrame.size.height;
 		else
 			keyboardHeight = keyboardFrame.size.width;
@@ -138,8 +140,8 @@
 	// Find the bottom of the screen (accounting for keyboard overlay)
 	// This is pretty much only for pagesheet's on the iPad
 	UIInterfaceOrientation orient = [[UIApplication sharedApplication] statusBarOrientation];
-	BOOL inLandscape = orient == UIInterfaceOrientationLandscapeLeft || orient == UIInterfaceOrientationLandscapeRight;
-	BOOL upsideDown = orient == UIInterfaceOrientationPortraitUpsideDown || orient == UIInterfaceOrientationLandscapeRight;
+    BOOL inLandscape = !naturalCoordinateSpace && (orient == UIInterfaceOrientationLandscapeLeft || orient == UIInterfaceOrientationLandscapeRight);
+	BOOL upsideDown = !naturalCoordinateSpace && (orient == UIInterfaceOrientationPortraitUpsideDown || orient == UIInterfaceOrientationLandscapeRight);
 	
 	CGPoint topOfViewPoint = [self.view convertPoint:CGPointZero toView:nil];
 	CGFloat topOfView = inLandscape ? topOfViewPoint.x : topOfViewPoint.y;
