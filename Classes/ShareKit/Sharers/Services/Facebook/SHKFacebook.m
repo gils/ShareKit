@@ -172,20 +172,28 @@ static SHKFacebook *requestingPermisSHKFacebook=nil;
      object:session];
     
     if (error) {
-		[FBSession.activeSession closeAndClearTokenInformation];
+        [FBSession.activeSession closeAndClearTokenInformation];
+        [self showAlertIfRequired:error];
+    }
+	if (authingSHKFacebook == self) {
+		authingSHKFacebook = nil;
+		[self release];
+	}
+}
+
+-(void) showAlertIfRequired:(NSError*) error {
+    NSString* title = [FBErrorUtility userTitleForError:error];
+    if (title) {
+        NSString* message = [FBErrorUtility userMessageForError:error];
         UIAlertView *alertView = [[UIAlertView alloc]
-                                  initWithTitle:@"Error"
-                                  message:error.localizedDescription
+                                  initWithTitle:title
+                                  message:message
                                   delegate:nil
                                   cancelButtonTitle:@"OK"
                                   otherButtonTitles:nil];
         [alertView show];
         [alertView release];
     }
-	if (authingSHKFacebook == self) {
-		authingSHKFacebook = nil;
-		[self release];
-	}
 }
 
 + (BOOL)handleOpenURL:(NSURL*)url
@@ -375,15 +383,7 @@ static SHKFacebook *requestingPermisSHKFacebook=nil;
                                                         return;
                                                         
                                                     } else {
-                                                        
-                                                        UIAlertView *alertView = [[UIAlertView alloc]
-                                                                                  initWithTitle:@"Error"
-                                                                                  message:error.localizedDescription
-                                                                                  delegate:nil
-                                                                                  cancelButtonTitle:@"OK"
-                                                                                  otherButtonTitles:nil];
-                                                        [alertView show];
-                                                        [alertView release];
+                                                        [self showAlertIfRequired:error];
                                                         
                                                         self.pendingAction = SHKPendingShare;	// flip back to here so they can cancel
                                                         [self tryPendingAction];
@@ -665,14 +665,7 @@ static SHKFacebook *requestingPermisSHKFacebook=nil;
 														 [[SHKActivityIndicator currentIndicator] hide];
 														 requestingPermisSHKFacebook = nil;
 														 if (error) {
-															 UIAlertView *alertView = [[UIAlertView alloc]
-																					   initWithTitle:@"Error"
-																					   message:error.localizedDescription
-																					   delegate:nil
-																					   cancelButtonTitle:@"OK"
-																					   otherButtonTitles:nil];
-															 [alertView show];
-                                                             [alertView release];
+                                                             [self showAlertIfRequired:error];
 															 
 															 [self sendDidCancel];
 														 }else{
